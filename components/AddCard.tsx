@@ -1,51 +1,121 @@
 "use client"
 
-import { useState } from "react"
 import { Button } from "@/components/ui/button"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { useForm } from "react-hook-form"
+import { z } from "zod"
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
+import { addCardServer } from "@/action/actions"
+import { useUser } from "@clerk/nextjs"
+import toast from "react-hot-toast"
+
+const formSchema = z.object({
+  cardNumber: z.string()
+    .min(12, { message: "Card number must be at least 12 digits" })
+    .max(19, { message: "Card number cannot exceed 19 digits" })
+    .regex(/^\d+$/, { message: "Card number must contain only digits" }),
+  
+  expiryDate: z.string()
+    .regex(/^(0[1-9]|1[0-2])\/\d{2}$/, { message: "Expiry date must be in MM/YY format" })
+    .refine((value) => {
+      const [month, year] = value.split('/').map(Number);
+      const expiry = new Date(2000 + year, month - 1);
+      return expiry > new Date();
+    }, { message: "Card has expired" }),
+  
+  cvv: z.coerce.number()
+    .min(3, { message: "CVV must be at least 3 digits" })
+})
 
 export function AddCard() {
-  const [cardNumber, setCardNumber] = useState("")
-  const [expiryDate, setExpiryDate] = useState("")
-  const [cvv, setCvv] = useState("")
+  const user = useUser()
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      cardNumber: "",
+      expiryDate: "",
+      cvv: 0
+    }
+  })
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    // TODO: Implement card submission logic
-    console.log("Card submitted:", { cardNumber, expiryDate, cvv })
+  function onSubmit(values: z.infer<typeof formSchema>) {
+    // Do something with the form values.
+    // ✅ This will be type-safe and validated.
+    console.log(values)
+    if(user.user){
+      addCardServer(values.cardNumber, values.expiryDate, values.cvv, user.user.id)
+      toast.success('Card Added!');
+      form.reset();
+    }
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <div>
-        <Label htmlFor="cardNumber">Card Number</Label>
-        <Input
-          id="cardNumber"
-          value={cardNumber}
-          onChange={(e) => setCardNumber(e.target.value)}
-          placeholder="1234 5678 9012 3456"
-          required
+
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        <FormField
+          control={form.control}
+          name="cardNumber"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Card Number</FormLabel>
+              <FormControl>
+                <Input placeholder="Card Number" {...field} />
+              </FormControl>
+              <FormDescription>
+                This is your card number.
+              </FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
         />
-      </div>
-        <div>
-          <Label htmlFor="expiryDate">Expiry Date</Label>
-          <Input
-            id="expiryDate"
-            value={expiryDate}
-            onChange={(e) => setExpiryDate(e.target.value)}
-            placeholder="MM/YY"
-            required
-          />
-        </div>
-        <div>
-          <Label htmlFor="cvv">CVV</Label>
-          <Input id="cvv" value={cvv} onChange={(e) => setCvv(e.target.value)} placeholder="123" required />
-        </div>
-      <Button type="submit" className="w-full">
-        Add Card
-      </Button>
-    </form>
+
+<FormField
+          control={form.control}
+          name="expiryDate"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Expiry Date</FormLabel>
+              <FormControl>
+                <Input placeholder="Expiry Date" {...field} />
+              </FormControl>
+              <FormDescription>
+                This is your card expiry date.
+              </FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+<FormField
+          control={form.control}
+          name="cvv"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>CVV</FormLabel>
+              <FormControl>
+                <Input placeholder="CVV" {...field} />
+              </FormControl>
+              <FormDescription>
+                This is your card CVV.
+              </FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <Button type="submit">Submit</Button>
+      </form>
+    </Form>
+    
   )
 }
 
