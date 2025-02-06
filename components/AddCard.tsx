@@ -17,6 +17,7 @@ import { Input } from "@/components/ui/input"
 import { addCardServer } from "@/action/actions"
 import { useUser } from "@clerk/nextjs"
 import toast from "react-hot-toast"
+import { useRouter } from "next/navigation"
 
 const formSchema = z.object({
   cardNumber: z.string()
@@ -38,6 +39,7 @@ const formSchema = z.object({
 
 export function AddCard() {
   const user = useUser()
+  const router = useRouter()
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -55,6 +57,7 @@ export function AddCard() {
       addCardServer(values.cardNumber, values.expiryDate, values.cvv, user.user.id)
       toast.success('Card Added!');
       form.reset();
+      router.refresh();
     }
   }
 

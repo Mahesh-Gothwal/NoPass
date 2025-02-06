@@ -15,7 +15,8 @@ export function YourCards({cards}:{cards:CardProps[]}) {
         <CardTitle>Your Cards</CardTitle>
       </CardHeader>
       <CardContent>
-        <ul className="space-y-2 h-48 overflow-y-scroll">
+        <ul className="space-y-2 h-48 overflow-y-auto">
+          {cards.length === 0 && <span className="text-muted-foreground">No cards added yet</span>}
           {cards.map((card:CardProps)=>(
             <li key={card.cardNo} className="flex justify-between items-center p-2 bg-secondary rounded">
               <span>{card.cardNo}</span>

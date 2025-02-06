@@ -17,7 +17,7 @@ const Navbar = () => {
     }
   };
   return (
-    <nav className="flex justify-between items-center px-4 h-16 bg-primary/20 text-foreground">
+    <nav className="flex justify-between items-center px-4 h-16 bg-purple-800 text-white">
       <span className="font-bold text-xl">NoPass</span>
       <ul className="flex items-center justify-start gap-5">
         <li>Home</li>
@@ -25,7 +25,7 @@ const Navbar = () => {
         <li>Services</li>
       </ul>
       <div className="flex gap-2 justify-center items-center">
-        <Button variant="outline" size="icon" onClick={toggleTheme}>
+        <Button variant="outline" size="icon" onClick={toggleTheme} className="text-foreground">
           <Sun className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
           <Moon className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
           <span className="sr-only">Toggle theme</span>

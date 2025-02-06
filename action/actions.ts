@@ -26,12 +26,21 @@ export async function addCardServer(
   if (Array.isArray(user.privateMetadata.cards)) {
     cards = user.privateMetadata.cards || [];
     cards.push({ cardNo, expiry, cvv });
+    await client.users.updateUserMetadata(userId, {
+      privateMetadata: {
+        cards: cards,
+      },
+    });
   }
-  await client.users.updateUserMetadata(userId, {
-    privateMetadata: {
-      cards: cards,
-    },
-  });
+  else{
+    await client.users.updateUserMetadata(userId, {
+      privateMetadata: {
+        cards: [{ cardNo, expiry, cvv }],
+      },
+    });
+  }
+
+
 }
 
 export async function addPasswordServer(
@@ -47,10 +56,19 @@ export async function addPasswordServer(
   if (Array.isArray(user.privateMetadata.cards)) {
     passwords = user.privateMetadata.cards || [];
     passwords.push({website, uesrname, password});
+
+    await client.users.updateUserMetadata(userId, {
+      privateMetadata: {
+        passwords: passwords,
+      },
+    });
   }
-  await client.users.updateUserMetadata(userId, {
-    privateMetadata: {
-      passwords: passwords,
-    },
-  });
+  else{
+    await client.users.updateUserMetadata(userId, {
+      privateMetadata: {
+        passwords: [{website, uesrname, password}],
+      },
+    });
+  }
+  
 }
